@@ -87,7 +87,19 @@ namespace LetterFall
             // Handle debug commands
             if (keyboardState.IsKeyDown(Keys.R) && _previousKeyboardState.IsKeyUp(Keys.R))
                 _grid.RandomizeLetters(); // Randomize grid on R key
+            // In Update method of Game1.cs, add these before the existing keyboard checks:
+            // Debug controls
+            if (keyboardState.IsKeyDown(Keys.Left) && _previousKeyboardState.IsKeyUp(Keys.Left))
+                _grid.ShiftRow(2, 1); // Shift middle row left
                 
+            if (keyboardState.IsKeyDown(Keys.Right) && _previousKeyboardState.IsKeyUp(Keys.Right))
+                _grid.ShiftRow(2, -1); // Shift middle row right
+                
+            if (keyboardState.IsKeyDown(Keys.Up) && _previousKeyboardState.IsKeyUp(Keys.Up))
+                _grid.ShiftColumn(2, 1); // Shift middle column up
+                
+            if (keyboardState.IsKeyDown(Keys.Down) && _previousKeyboardState.IsKeyUp(Keys.Down))
+                _grid.ShiftColumn(2, -1); // Shift middle column down
             // Update input
             _inputHandler.Update(gameTime);
             

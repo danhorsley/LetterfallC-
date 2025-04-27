@@ -94,12 +94,12 @@ namespace LetterFall.Models
         /// <param name="positions">Positions to shift (positive = right/down, negative = left/up)</param>
         public void Shift(int positions)
         {
-            // Handle the offset in a circular way
-            _offset = (_offset - positions) % _stripSize;
-            
-            // Ensure positive modulo result
-            if (_offset < 0)
-                _offset += _stripSize;
+    // Handle the offset in a circular way
+    _offset = (_offset - positions) % _stripSize;
+    
+    // Ensure positive modulo result
+    if (_offset < 0)
+        _offset += _stripSize;
         }
         
         /// <summary>
