@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using LetterFall.Models;
 using LetterFall.GameComponents.Input;
 using LetterFall.GameComponents.Words;
+using System.IO;
 
 namespace LetterFall
 {
@@ -48,22 +49,34 @@ namespace LetterFall
 
         protected override void Initialize()
         {
-            // Calculate grid area
-            int gridSize = 400;
-            int centerX = _graphics.PreferredBackBufferWidth / 2;
-            int centerY = _graphics.PreferredBackBufferHeight / 2;
-            _gridArea = new Rectangle(centerX - gridSize/2, centerY - gridSize/2, gridSize, gridSize);
-            _cellSize = gridSize / 5f; // 5x5 grid
-            
-            // Create game components
-            _grid = new LetterGrid();
-            _inputHandler = new InputHandler(_grid, _gridArea);
-            _wordDetector = new WordDetector(_grid);
-            
-            _score = 0;
-            _currentWords = new List<DetectedWord>();
-            
-            base.Initialize();
+        // Calculate grid area
+        int gridSize = 400;
+        int centerX = _graphics.PreferredBackBufferWidth / 2;
+        int centerY = _graphics.PreferredBackBufferHeight / 2;
+        _gridArea = new Rectangle(centerX - gridSize/2, centerY - gridSize/2, gridSize, gridSize);
+        _cellSize = gridSize / 5f; // 5x5 grid
+        
+        // Create game components
+        _grid = new LetterGrid();
+        _inputHandler = new InputHandler(_grid, _gridArea);
+        _wordDetector = new WordDetector(_grid);
+        
+        // Load external dictionary
+        string wordListPath = "Content/wordlist.txt";
+        if (File.Exists(wordListPath))
+        {
+            _wordDetector.LoadDictionary(wordListPath);
+            System.Diagnostics.Debug.WriteLine("Loaded external word list");
+        }
+        else
+        {
+            System.Diagnostics.Debug.WriteLine("Word list file not found: " + wordListPath);
+        }
+        
+        _score = 0;
+        _currentWords = new List<DetectedWord>();
+        
+        base.Initialize();
         }
 
         protected override void LoadContent()
