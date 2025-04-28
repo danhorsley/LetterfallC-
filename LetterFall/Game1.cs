@@ -224,7 +224,13 @@ namespace LetterFall
             string instructions = "Drag rows/columns to move letters\nPress SPACE to clear words\nPress R to randomize grid\nPress ESC to exit";
             Vector2 instructionPos = new Vector2(20, _graphics.PreferredBackBufferHeight - 100);
             _spriteBatch.DrawString(_font, instructions, instructionPos, _textColor * 0.7f);
-            
+
+            // Add the debug info here
+            string debugInfo = $"Selected Row: {_inputHandler.SelectedRow}, Column: {_inputHandler.SelectedColumn}\n" + 
+                            $"Drag Direction: {_inputHandler.CurrentDragDirection}";
+            Vector2 debugPos = new Vector2(20, _graphics.PreferredBackBufferHeight - 140);
+            _spriteBatch.DrawString(_font, debugInfo, debugPos, Color.Yellow);
+
             _spriteBatch.End();
             
             base.Draw(gameTime);
