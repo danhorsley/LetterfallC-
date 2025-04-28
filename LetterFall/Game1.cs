@@ -59,7 +59,7 @@ namespace LetterFall
         // Create game components
         _grid = new LetterGrid();
         _inputHandler = new InputHandler(_grid, _gridArea);
-        _wordDetector = new WordDetector(_grid);
+        _wordDetector = new WordDetector(_grid,4,5);
         
         // Load external dictionary
         string wordListPath = "Content/wordlist.txt";
