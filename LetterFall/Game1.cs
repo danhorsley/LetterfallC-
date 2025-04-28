@@ -57,37 +57,36 @@ namespace LetterFall
 
         protected override void Initialize()
         {
-        // Calculate grid area
-        int gridSize = 400;
-        int centerX = _graphics.PreferredBackBufferWidth / 2;
-        int centerY = _graphics.PreferredBackBufferHeight / 2;
-        _gridArea = new Rectangle(centerX - gridSize/2, centerY - gridSize/2, gridSize, gridSize);
-        _cellSize = gridSize / 5f; // 5x5 grid
-        
-        // Create game components
-        _grid = new LetterGrid();
-        _inputHandler = new InputHandler(_grid, _gridArea);
-        _wordDetector = new WordDetector(_grid,4,5);
-        
-        // Load external dictionary
-        string wordListPath = "Content/wordlist.txt";
-        if (File.Exists(wordListPath))
-        {
-            _wordDetector.LoadDictionary(wordListPath);
-            System.Diagnostics.Debug.WriteLine("Loaded external word list");
-        }
-        else
-        {
-            System.Diagnostics.Debug.WriteLine("Word list file not found: " + wordListPath);
-        }
-        _devWindow = new GameComponents.DeveloperWindow(
-        new Rectangle(50, 50, 300, 400),
-        _font  // This will need to be initialized later, so this line should come after LoadContent
-        );
-        _score = 0;
-        _currentWords = new List<DetectedWord>();
-        
-        base.Initialize();
+            // Calculate grid area
+            int gridSize = 400;
+            int centerX = _graphics.PreferredBackBufferWidth / 2;
+            int centerY = _graphics.PreferredBackBufferHeight / 2;
+            _gridArea = new Rectangle(centerX - gridSize/2, centerY - gridSize/2, gridSize, gridSize);
+            _cellSize = gridSize / 5f; // 5x5 grid
+            
+            // Create game components
+            _grid = new LetterGrid();
+            _inputHandler = new InputHandler(_grid, _gridArea);
+            _wordDetector = new WordDetector(_grid, 4, 5);
+            
+            // Load external dictionary
+            string wordListPath = "Content/wordlist.txt";
+            if (File.Exists(wordListPath))
+            {
+                _wordDetector.LoadDictionary(wordListPath);
+                System.Diagnostics.Debug.WriteLine("Loaded external word list");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("Word list file not found: " + wordListPath);
+            }
+            
+            // Don't create the _devWindow here - we'll do it in LoadContent
+            
+            _score = 0;
+            _currentWords = new List<DetectedWord>();
+            
+            base.Initialize();
         }
 
         protected override void LoadContent()
@@ -96,6 +95,12 @@ namespace LetterFall
             
             // Load the font
             _font = Content.Load<SpriteFont>("Arial");
+            
+            // Create the developer window now that the font is loaded
+            _devWindow = new GameComponents.DeveloperWindow(
+                new Rectangle(50, 50, 300, 400),
+                _font
+            );
             
             // If the font doesn't exist yet, create this in the Content Pipeline
             // You'll need to add a SpriteFont file to your Content project
@@ -152,7 +157,7 @@ namespace LetterFall
                     _autoClearTimer = _autoClearDelay;
                 }
             }
-            if (keyboardState.IsKeyDown(Keys.F1) && _previousKeyboardState.IsKeyUp(Keys.F5))
+            if (keyboardState.IsKeyDown(Keys.F1) && _previousKeyboardState.IsKeyUp(Keys.F1))
             {
                 _devWindow.ToggleVisibility();
             }
