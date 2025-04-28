@@ -36,6 +36,13 @@ namespace LetterFall
         private Color _highlightColor = new Color(100, 200, 100, 180);
         private Color _selectedRowColColor = new Color(80, 100, 120);
 
+        //Combos
+        private int _comboMultiplier = 1;
+        private int _comboChainLength = 0;
+        private bool _cascadeInProgress = false;
+        private float _autoClearDelay = 0.5f; // Half a second delay
+        private float _autoClearTimer = 0;
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -128,7 +135,19 @@ namespace LetterFall
                     ClearWords();
                 }
             }
-            
+             if (_cascadeInProgress && _currentWords.Count > 0)
+            {
+                _autoClearTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                
+                if (_autoClearTimer <= 0)
+                {
+                    // Automatically clear words when the timer expires
+                    ClearWords();
+                    
+                    // Reset the timer for the next potential cascade
+                    _autoClearTimer = _autoClearDelay;
+                }
+            }
             _previousKeyboardState = keyboardState;
             
             base.Update(gameTime);
@@ -301,7 +320,13 @@ namespace LetterFall
             }
             // Draw score and words
             _spriteBatch.DrawString(_font, $"Score: {_score}", new Vector2(20, 20), _textColor);
-            
+            // draw combos
+            if (_comboMultiplier > 1)
+            {
+                string comboText = $"COMBO x{_comboMultiplier} (Chain: {_comboChainLength})";
+                Vector2 comboPosition = new Vector2(20, 90);
+                _spriteBatch.DrawString(_font, comboText, comboPosition, Color.Yellow);
+            }
             // Draw found words
             Vector2 wordPosition = new Vector2(20, 60);
             foreach (DetectedWord word in _currentWords)
@@ -334,11 +359,37 @@ namespace LetterFall
             if (_currentWords.Count == 0)
                 return;
                 
+            // Count the initial number of words as a "base combo"
+            int initialWordCount = _currentWords.Count;
+            
+            if (initialWordCount > 1)
+            {
+                // Start a new combo if we cleared multiple words at once
+                _comboMultiplier = initialWordCount;
+                _comboChainLength = 1;
+                _cascadeInProgress = true;
+            }
+            else if (!_cascadeInProgress)
+            {
+                // Reset combo if this isn't part of a cascade and we only found one word
+                _comboMultiplier = 1;
+                _comboChainLength = 0;
+            }
+            else
+            {
+                // We're in a cascade, so increment the chain length
+                _comboChainLength++;
+            }
+            
             // Add score for each word
             foreach (DetectedWord word in _currentWords)
             {
                 // Score based on word length: 3 letters = 30 pts, 4 letters = 60 pts, 5 letters = 100 pts
                 int wordScore = word.Length * word.Length * 10; // Quadratic scoring for longer words
+                
+                // Apply the combo multiplier
+                wordScore *= _comboMultiplier;
+                
                 _score += wordScore;
             }
             
@@ -352,6 +403,18 @@ namespace LetterFall
             if (_currentWords.Count > 0)
             {
                 _wordDetector.HighlightWords(_currentWords);
+                
+                // If we're in a cascade, automatically clear words after a short delay
+                if (_cascadeInProgress)
+                {
+                    // We'll need to add a timer system to handle this delay
+                    _autoClearTimer = _autoClearDelay;
+                }
+            }
+            else
+            {
+                // No more words to clear, end the cascade
+                _cascadeInProgress = false;
             }
         }
         
