@@ -208,7 +208,84 @@ namespace LetterFall
                     _spriteBatch.DrawString(_font, letter.ToString(), position, _textColor);
                 }
             }
-            
+            // After drawing the grid letters, add code to draw extended strips
+            // First, draw the extended horizontal strips
+            for (int row = 0; row < 5; row++)
+            {
+                // Get extended row letters (3 letters on each side)
+                char[] extendedLetters = _grid.GetExtendedRowLetters(row, 3);
+                
+                // Draw letters to the left of the grid
+                for (int i = 0; i < 3; i++)
+                {
+                    char letter = extendedLetters[i];
+                    Vector2 textSize = _font.MeasureString(letter.ToString());
+                    
+                    // Position the letter to the left of the grid
+                    Vector2 position = new Vector2(
+                        _gridArea.X - (3 - i) * _cellSize + (_cellSize / 2) - (textSize.X / 2),
+                        _gridArea.Y + (row * _cellSize) + (_cellSize / 2) - (textSize.Y / 2)
+                    );
+                    
+                    // Draw with slightly reduced alpha
+                    _spriteBatch.DrawString(_font, letter.ToString(), position, _textColor * 0.5f);
+                }
+                
+                // Draw letters to the right of the grid
+                for (int i = 0; i < 3; i++)
+                {
+                    char letter = extendedLetters[i + 5 + 3]; // Skip the 5 visible letters and the 3 left letters
+                    Vector2 textSize = _font.MeasureString(letter.ToString());
+                    
+                    // Position the letter to the right of the grid
+                    Vector2 position = new Vector2(
+                        _gridArea.X + _gridArea.Width + (i * _cellSize) + (_cellSize / 2) - (textSize.X / 2),
+                        _gridArea.Y + (row * _cellSize) + (_cellSize / 2) - (textSize.Y / 2)
+                    );
+                    
+                    // Draw with slightly reduced alpha
+                    _spriteBatch.DrawString(_font, letter.ToString(), position, _textColor * 0.5f);
+                }
+            }
+
+            // Now, draw the extended vertical strips
+            for (int col = 0; col < 5; col++)
+            {
+                // Get extended column letters (3 letters on each side)
+                char[] extendedLetters = _grid.GetExtendedColumnLetters(col, 3);
+                
+                // Draw letters above the grid
+                for (int i = 0; i < 3; i++)
+                {
+                    char letter = extendedLetters[i];
+                    Vector2 textSize = _font.MeasureString(letter.ToString());
+                    
+                    // Position the letter above the grid
+                    Vector2 position = new Vector2(
+                        _gridArea.X + (col * _cellSize) + (_cellSize / 2) - (textSize.X / 2),
+                        _gridArea.Y - (3 - i) * _cellSize + (_cellSize / 2) - (textSize.Y / 2)
+                    );
+                    
+                    // Draw with slightly reduced alpha
+                    _spriteBatch.DrawString(_font, letter.ToString(), position, _textColor * 0.5f);
+                }
+                
+                // Draw letters below the grid
+                for (int i = 0; i < 3; i++)
+                {
+                    char letter = extendedLetters[i + 5 + 3]; // Skip the 5 visible letters and the 3 top letters
+                    Vector2 textSize = _font.MeasureString(letter.ToString());
+                    
+                    // Position the letter below the grid
+                    Vector2 position = new Vector2(
+                        _gridArea.X + (col * _cellSize) + (_cellSize / 2) - (textSize.X / 2),
+                        _gridArea.Y + _gridArea.Height + (i * _cellSize) + (_cellSize / 2) - (textSize.Y / 2)
+                    );
+                    
+                    // Draw with slightly reduced alpha
+                    _spriteBatch.DrawString(_font, letter.ToString(), position, _textColor * 0.5f);
+                }
+            }
             // Draw score and words
             _spriteBatch.DrawString(_font, $"Score: {_score}", new Vector2(20, 20), _textColor);
             
