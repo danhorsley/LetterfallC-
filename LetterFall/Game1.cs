@@ -42,6 +42,7 @@ namespace LetterFall
         private bool _cascadeInProgress = false;
         private float _autoClearDelay = 0.5f; // Half a second delay
         private float _autoClearTimer = 0;
+        private GameComponents.DeveloperWindow _devWindow;
 
         public Game1()
         {
@@ -79,7 +80,10 @@ namespace LetterFall
         {
             System.Diagnostics.Debug.WriteLine("Word list file not found: " + wordListPath);
         }
-        
+        _devWindow = new GameComponents.DeveloperWindow(
+        new Rectangle(50, 50, 300, 400),
+        _font  // This will need to be initialized later, so this line should come after LoadContent
+        );
         _score = 0;
         _currentWords = new List<DetectedWord>();
         
@@ -148,8 +152,17 @@ namespace LetterFall
                     _autoClearTimer = _autoClearDelay;
                 }
             }
+            if (keyboardState.IsKeyDown(Keys.F1) && _previousKeyboardState.IsKeyUp(Keys.F5))
+            {
+                _devWindow.ToggleVisibility();
+            }
             _previousKeyboardState = keyboardState;
-            
+            _grid.UpdateAnimations((float)gameTime.ElapsedGameTime.TotalSeconds);
+            // Update developer window
+            _devWindow.Update(gameTime);
+
+            // Get values from dev window for parameters
+            _autoClearDelay = _devWindow.GetNumericParameter("Auto Clear Delay");
             base.Update(gameTime);
         }
 
@@ -326,6 +339,14 @@ namespace LetterFall
                 string comboText = $"COMBO x{_comboMultiplier} (Chain: {_comboChainLength})";
                 Vector2 comboPosition = new Vector2(20, 90);
                 _spriteBatch.DrawString(_font, comboText, comboPosition, Color.Yellow);
+                
+                // If cascade is in progress, show countdown
+                if (_cascadeInProgress && _currentWords.Count > 0)
+                {
+                    string cascadeText = $"Next cascade in: {_autoClearTimer:0.0}s";
+                    Vector2 cascadePosition = new Vector2(20, 120);
+                    _spriteBatch.DrawString(_font, cascadeText, cascadePosition, Color.Orange);
+                }
             }
             // Draw found words
             Vector2 wordPosition = new Vector2(20, 60);
@@ -339,7 +360,25 @@ namespace LetterFall
             string instructions = "Drag rows/columns to move letters\nPress SPACE to clear words\nPress R to randomize grid\nPress ESC to exit";
             Vector2 instructionPos = new Vector2(20, _graphics.PreferredBackBufferHeight - 100);
             _spriteBatch.DrawString(_font, instructions, instructionPos, _textColor * 0.7f);
-
+            // Draw developer window
+            _devWindow.Draw(_spriteBatch);
+            foreach (var animLetter in _grid.AnimatingLetters)
+            {
+                char letter = animLetter.Letter;
+                Vector2 textSize = _font.MeasureString(letter.ToString());
+                
+                // Center the letter in the cell
+                Vector2 position = new Vector2(
+                    _gridArea.X + (animLetter.Column * _cellSize) + (_cellSize / 2) - (textSize.X / 2),
+                    _gridArea.Y + (animLetter.Row * _cellSize) + (_cellSize / 2) - (textSize.Y / 2)
+                );
+                
+                // Calculate alpha based on remaining time
+                float alpha = animLetter.Timer / 0.5f; // Assuming 0.5s was the base animation time
+                
+                // Draw with fading effect
+                _spriteBatch.DrawString(_font, letter.ToString(), position, _textColor * alpha);
+            }
             // Add the debug info here
             string debugInfo = $"Selected Row: {_inputHandler.SelectedRow}, Column: {_inputHandler.SelectedColumn}\n" + 
                             $"Drag Direction: {_inputHandler.CurrentDragDirection}";

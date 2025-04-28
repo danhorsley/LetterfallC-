@@ -289,6 +289,10 @@ namespace LetterFall.Models
             int removedCount = 0;
             bool[,] removedPositions = new bool[_gridSize, _gridSize];
             
+            // Create animations for selected letters that will be removed
+            AnimatingLetters.Clear();
+            float baseAnimationDelay = 0.5f; // Half second animation
+            
             // First, mark which positions need to be removed
             for (int row = 0; row < _gridSize; row++)
             {
@@ -298,6 +302,11 @@ namespace LetterFall.Models
                     {
                         removedPositions[row, col] = true;
                         removedCount++;
+                        
+                        // Add an animating letter
+                        char letter = GetLetter(row, col);
+                        AnimatingLetter anim = new AnimatingLetter(row, col, letter, baseAnimationDelay);
+                        AnimatingLetters.Add(anim);
                     }
                 }
             }
@@ -384,6 +393,40 @@ namespace LetterFall.Models
             
             // Synchronize horizontal strips based on new vertical strip values
             SynchronizeHorizontalStrips();
+        }
+               
+        public class AnimatingLetter
+        {
+            public int Row { get; }
+            public int Column { get; }
+            public char Letter { get; }
+            public float Timer { get; set; }
+            
+            public AnimatingLetter(int row, int column, char letter, float timer)
+            {
+                Row = row;
+                Column = column;
+                Letter = letter;
+                Timer = timer;
+            }
+        }
+
+        // Add this property to the LetterGrid class
+        public List<AnimatingLetter> AnimatingLetters { get; private set; } = new List<AnimatingLetter>();
+
+
+        // Add a new method to update the animations
+        public void UpdateAnimations(float deltaTime)
+        {
+            for (int i = AnimatingLetters.Count - 1; i >= 0; i--)
+            {
+                AnimatingLetters[i].Timer -= deltaTime;
+                
+                if (AnimatingLetters[i].Timer <= 0)
+                {
+                    AnimatingLetters.RemoveAt(i);
+                }
+            }
         }
     }
 }
