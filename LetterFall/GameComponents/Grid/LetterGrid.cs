@@ -280,5 +280,110 @@ namespace LetterFall.Models
                 
             return _verticalStrips[colIndex].GetExtendedVisibleLetters(paddingSize);
         }
+                /// <summary>
+        /// Removes all selected letters (matched words) and applies gravity
+        /// </summary>
+        /// <returns>Number of letters removed</returns>
+        public int RemoveSelectedLetters()
+        {
+            int removedCount = 0;
+            bool[,] removedPositions = new bool[_gridSize, _gridSize];
+            
+            // First, mark which positions need to be removed
+            for (int row = 0; row < _gridSize; row++)
+            {
+                for (int col = 0; col < _gridSize; col++)
+                {
+                    if (_selectedLetters[row, col])
+                    {
+                        removedPositions[row, col] = true;
+                        removedCount++;
+                    }
+                }
+            }
+            
+            // Apply gravity to each column
+            for (int col = 0; col < _gridSize; col++)
+            {
+                ApplyGravityToColumn(col, removedPositions);
+            }
+            
+            // Clear selections since we've processed them
+            ClearSelections();
+            
+            return removedCount;
+        }
+        
+        /// <summary>
+        /// Applies gravity to a column, moving letters down to fill empty spaces
+        /// </summary>
+        /// <param name="col">Column index</param>
+        /// <param name="removedPositions">Grid of positions to remove</param>
+        private void ApplyGravityToColumn(int col, bool[,] removedPositions)
+        {
+            // Get all letters in this column's vertical strip
+            char[] verticalLetters = _verticalStrips[col].GetAllLetters();
+            
+            // Count letters to remove in this column
+            int removeCount = 0;
+            for (int row = 0; row < _gridSize; row++)
+            {
+                if (removedPositions[row, col])
+                {
+                    removeCount++;
+                }
+            }
+            
+            if (removeCount == 0)
+                return; // Nothing to do for this column
+                
+            // Create a new array for the updated letters
+            char[] newVerticalLetters = new char[_stripSize];
+            
+            // Create a mapping from visible grid positions to vertical strip positions
+            int[] verticalPositions = new int[_gridSize];
+            for (int row = 0; row < _gridSize; row++)
+            {
+                verticalPositions[row] = (_verticalStrips[col].Offset + row) % _stripSize;
+            }
+            
+            // First, copy letters that aren't removed
+            int destIndex = 0;
+            for (int i = 0; i < _stripSize; i++)
+            {
+                // Check if this position is visible and marked for removal
+                bool isRemoved = false;
+                for (int row = 0; row < _gridSize; row++)
+                {
+                    if (verticalPositions[row] == i && removedPositions[row, col])
+                    {
+                        isRemoved = true;
+                        break;
+                    }
+                }
+                
+                if (!isRemoved)
+                {
+                    newVerticalLetters[destIndex] = verticalLetters[i];
+                    destIndex++;
+                }
+            }
+            
+            // Add new random letters at the top
+            Random random = new Random();
+            string commonLetters = "EEEEEEEEEEAAAAAAAARRRRRRRIIIIIIIOOOOOOOTTTTTTTNNNNNNNSSSSSSLLLLLCCCCUUUUDDDPPPMMM";
+            
+            for (int i = 0; i < removeCount; i++)
+            {
+                newVerticalLetters[destIndex] = commonLetters[random.Next(commonLetters.Length)];
+                destIndex++;
+            }
+            
+            // Apply the updated letters to the vertical strip
+            _verticalStrips[col].SetLetters(newVerticalLetters);
+            
+            // Synchronize horizontal strips based on new vertical strip values
+            SynchronizeHorizontalStrips();
+        }
     }
 }

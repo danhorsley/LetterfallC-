@@ -314,10 +314,13 @@ namespace LetterFall
         }
         
         /// <summary>
-        /// Clears found words and calculates score
+        /// Clears found words, calculates score, and applies gravity
         /// </summary>
         private void ClearWords()
         {
+            if (_currentWords.Count == 0)
+                return;
+                
             // Add score for each word
             foreach (DetectedWord word in _currentWords)
             {
@@ -326,9 +329,17 @@ namespace LetterFall
                 _score += wordScore;
             }
             
-            // Clear selections
-            _grid.ClearSelections();
-            _currentWords.Clear();
+            // Remove the selected letters and apply gravity
+            int lettersRemoved = _grid.RemoveSelectedLetters();
+            
+            // Find any new words that may have formed after applying gravity
+            _currentWords = _wordDetector.FindWords();
+            
+            // If new words were formed, highlight them (but don't clear yet)
+            if (_currentWords.Count > 0)
+            {
+                _wordDetector.HighlightWords(_currentWords);
+            }
         }
         
         /// <summary>

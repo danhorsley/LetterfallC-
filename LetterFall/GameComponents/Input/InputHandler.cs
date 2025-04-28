@@ -176,7 +176,7 @@ namespace LetterFall.GameComponents.Input
             
             // Negative shifts = right drag (letters move left)
             // Positive shifts = left drag (letters move right)
-            _grid.ShiftRow(_selectedRow, -shifts);
+            _grid.ShiftRow(_selectedRow, shifts);
             
             // Remove the processed drag amount
             _accumulatedDrag -= shifts * DRAG_THRESHOLD;
@@ -196,7 +196,7 @@ namespace LetterFall.GameComponents.Input
         if (cellsMoved != 0)
         {
             // Apply the shift
-            _grid.ShiftColumn(_selectedColumn, -cellsMoved);
+            _grid.ShiftColumn(_selectedColumn, cellsMoved);
             
             // Adjust the accumulated drag and reset the drag start point
             _accumulatedDrag -= cellsMoved * DRAG_THRESHOLD;
