@@ -76,14 +76,14 @@ namespace LetterFall.Models
         }
         
         /// <summary>
-        /// Updates vertical strips based on the current state of horizontal strips
-        /// </summary>
+/// Updates vertical strips based on the current state of horizontal strips
+/// </summary>
         private void SynchronizeVerticalStrips()
         {
             // For each vertical strip
             for (int col = 0; col < _gridSize; col++)
             {
-                char[] verticalLetters = _verticalStrips[col].GetAllLetters();
+                char[] verticalLetters = new char[_stripSize];
                 
                 // For each position in the visible part of the vertical strip
                 for (int row = 0; row < _gridSize; row++)
@@ -96,6 +96,31 @@ namespace LetterFall.Models
                     
                     // Update the vertical strip
                     verticalLetters[verticalPos] = letter;
+                }
+                
+                // Fill the rest of the vertical strip with random letters
+                Random random = new Random();
+                string commonLetters = "EEEEEEEEEEAAAAAAAARRRRRRRIIIIIIIOOOOOOOTTTTTTTNNNNNNNSSSSSSLLLLLCCCCUUUUDDDPPPMMM";
+                
+                for (int i = 0; i < _stripSize; i++)
+                {
+                    // Skip positions that were already set from the horizontal strips
+                    bool isSet = false;
+                    for (int row = 0; row < _gridSize; row++)
+                    {
+                        int verticalPos = (_verticalStrips[col].Offset + row) % _stripSize;
+                        if (verticalPos == i)
+                        {
+                            isSet = true;
+                            break;
+                        }
+                    }
+                    
+                    // If this position wasn't set from horizontal strips, set a random letter
+                    if (!isSet)
+                    {
+                        verticalLetters[i] = commonLetters[random.Next(commonLetters.Length)];
+                    }
                 }
                 
                 // Apply the updated letters to the vertical strip
