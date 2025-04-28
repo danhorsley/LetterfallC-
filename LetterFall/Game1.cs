@@ -41,9 +41,9 @@ namespace LetterFall
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             
-            // Set up window size
-            _graphics.PreferredBackBufferWidth = 800;
-            _graphics.PreferredBackBufferHeight = 600;
+            // Increase window size to accommodate extended strips
+            _graphics.PreferredBackBufferWidth = 1024;  // Increased from 800
+            _graphics.PreferredBackBufferHeight = 900;  // Increased from 600
         }
 
         protected override void Initialize()
